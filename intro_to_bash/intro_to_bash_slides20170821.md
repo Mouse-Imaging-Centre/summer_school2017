@@ -2,6 +2,7 @@
 What is a command line or terminal?
 -----------------------------------
 
+-   Great overview and tutorial: [](bash_tutorial.pdf)
 -   Open terminal
     -   on Mac: command + space -&gt; Terminal
     -   on Windows: use ssh client, e.g. cygwin
@@ -67,6 +68,8 @@ ls  # shows you what’s there
 ```
 
     ## /hpf/largeprojects/MICe/chammill/presentations/summer_school2017/intro_to_bash
+    ## bash_tutorial.pdf
+    ## intro_to_bash_slides20170821.html
     ## intro_to_bash_slides20170821.md
     ## intro_to_bash_slides20170821.Rmd
     ## intro_to_bash_slides20170821.Rmd~
@@ -92,10 +95,12 @@ ls -l  # gives you long output (who created file, date of creation, size of file
 #ls -l DIRECTORY # shows you what’s in that directory 
 ```
 
-    ## total 77
-    ## -rw-r--r-- 1 chammill mice 5466 Aug 21 15:42 intro_to_bash_slides20170821.md
-    ## -rw-r--r-- 1 chammill mice 3758 Aug 21 15:49 intro_to_bash_slides20170821.Rmd
-    ## -rw-r--r-- 1 chammill mice 3757 Aug 21 15:47 intro_to_bash_slides20170821.Rmd~
+    ## total 488
+    ## -rw-r--r-- 1 chammill mice 99491 Aug 21 15:59 bash_tutorial.pdf
+    ## -rw-r--r-- 1 chammill mice 25554 Aug 21 15:52 intro_to_bash_slides20170821.html
+    ## -rw-r--r-- 1 chammill mice  5634 Aug 21 15:52 intro_to_bash_slides20170821.md
+    ## -rw-r--r-- 1 chammill mice  3811 Aug 21 16:01 intro_to_bash_slides20170821.Rmd
+    ## -rw-r--r-- 1 chammill mice  3757 Aug 21 15:47 intro_to_bash_slides20170821.Rmd~
 
 Paths
 -----
@@ -186,6 +191,8 @@ Let's have a look at the first clue
 ls 
 ```
 
+    ## bash_tutorial.pdf
+    ## intro_to_bash_slides20170821.html
     ## intro_to_bash_slides20170821.md
     ## intro_to_bash_slides20170821.Rmd
     ## intro_to_bash_slides20170821.Rmd~
