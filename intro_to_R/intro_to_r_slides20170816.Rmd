@@ -1,0 +1,294 @@
+---
+tile: Intro to R
+output: github_document
+---
+
+## Getting set up
+
+1. WiFi
+2. Open firefox to 172.16.128.140:8787
+3. Log in with your MICe credentials
+4. Set you paths:
+
+```{r}
+Sys.setenv(PATH = "/axiom2/projects/software/arch/linux-precise/bin/:/OGS/bin/linux-x64:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+           , PYTHONPATH = "/axiom2/projects/software/arch/linux-precise/python/"
+           , LD_LIBRARY_PATH = "/axiom2/projects/software/arch/linux-precise/lib/:/axiom2/projects/software/arch/linux-precise/lib/InsightToolkit/")
+```
+
+## Intro To R
+
+R is a statistical computing environment and an interpretted programming language
+"designed by statisticians for statisticians"^TM
+
+You don't need to be a programmer to use R
+
+But it helps to know some programming.
+
+## R Basics
+
+R is all about data and transformations of data.
+The most fundamental type of data in R is the **vector**. 
+A vector is a one dimensional array of information.
+
+We'll take the R provided vector `LETTERS` as an example.
+
+Input the following line and press enter
+
+```{r}
+LETTERS
+```
+
+R is an interpretted language. When you issue a command in the console, the R interpretter will give
+output any response it might have.
+
+The above line asks the R interpretter to print the value of `LETTERS`. R will print the result of any computation
+aprovided at the command line automatically. Printing to the console can also be specified manually
+
+```{r}
+print(LETTERS)
+```
+
+The `print` command comes in handy when you want to print intermediate results of a computation.
+
+## Creating your own vectors
+
+To construct a vector, R provides the `c` function, to construct a vector from elements.
+
+```{r}
+c(1,2,3,4,5)
+```
+
+R also provides a short hand for creating numerical sequences
+
+```{r}
+1:5
+```
+
+## Subsetting
+
+Sometimes you only want specific elements from a vector. The way to do this in R is the `[` operator.
+
+```{r}
+LETTERS[5]
+LETTERS[c(2,3)]
+LETTERS[-(4:25)]
+```
+
+An important note - R indexes from 1. This is an oddity for modern programming languages, most index from 
+zero.
+
+### No Scalars
+
+If you experience with other programming languages you might expect R to make the distinction between vectors
+and their single element counterparts. R does not make this distinction. An element of a vector is just a one
+element vector
+
+```{r}
+LETTERS[1][1][1][1]
+```
+
+## Recap Vectors
+
+1. Vectors are 1D arrays of elements
+2. Vectors can be made by `c`onstructing them
+3. Vectors can be subset with `[` by single elements, vectors of elements, and removal
+4. R indexes from 1
+5. There are no scalars
+
+## Assignment
+
+Often you want to save the result of a computation. R, like all languages, provides a mechanism to
+assign values to names (Pro Secret: It's actually the opposite). Names need to start with a letter,
+but may contain the special characters `_` and `.` as well as numbers
+
+To assign values in R we use the `<-` assignment operator. Yet another case where R is a bit weird.
+
+```{r}
+an_appropriate_name1 <- 1:5
+
+an_appropriate_name1
+```
+
+And elements of vectors can be assigned in place
+
+```{r}
+an_appropriate_name1[1] <- 10
+
+an_appropriate_name1
+```
+
+## Lists
+
+The second most fundamental data type in R is the list. Vectors are collections of elements with
+a given type (like numbers or letters), whereas lists are collections of whatever you'd like.
+
+Lists can be made with the `list` function
+
+```{r}
+l <- list(a = 5, b = "words", c = list())
+l
+```
+
+Lists can be subset like vectors and assigned like vectors
+
+```{r}
+l[2:3] <- list("ardvark", 10)
+l
+```
+
+The subsetting operator (`[`) for lists returns a list containing the selected elements. To get a specific
+element out a list, you need the `[[` operator.
+
+```{r}
+l[2]
+l[[2]]
+```
+
+Lists can contain both named and unnamed elements. Named elements can be accessed directly with the `$`
+operator.
+
+```{r}
+l$a
+```
+
+## Assignment and Lists Recap
+
+1. Values can be assigned to names with the `<-` operator
+2. Elements of vectors can be assigned in place
+3. Lists are collections of arbitrary elements
+4. Lists can be created with the `list` function with either named or unnamed elements
+5. Lists can be subset and assigned like vectors
+6. List elements can be accessed with `[[` operators
+7. Named list elements can be accessed with the `$` operator
+
+## Data Frames
+
+The next data type to cover and one of the most important is the `data.frame`. Data frames are 
+analogous to a sheet in excel or a table in a database. They are rectangular arrays of data, each column
+must have the same number of elements. Each column can contain elements of only one type, but data may
+differ in type across the rows. In R a data frame is a special case of a list of vectors.
+
+```{r}
+frame <- data.frame(subject = 1:20,
+                    group = sample(c("A", "B"), 20, replace = TRUE),
+                    measurement = rnorm(20))
+
+frame
+```
+
+*Note the bonus functions `sample` (choosing random elements from a vector), and `rnorm` (normally distributed random numbers), don't worry about them yet*
+
+I can treat my `data.frame` exactly like the `list` that it is, and extract the 'measurement' column
+
+```{r}
+frame$measurement
+```
+Observe that measurment is in fact a vector of numbers.
+
+Data frames can also be subset by row and columns simultaneously to extract element. 
+
+```{r}
+frame[5, "group"]
+```
+
+And we can see that we can pull values out of the data frame. This notation can also be used to get entire rows and columns
+
+```{r}
+frame[5,]
+frame[,2]
+```
+
+New columns can be added by subset assignment
+
+```{r}
+frame$test <- rnorm(10)
+
+frame
+```
+
+And columns can be erased by setting the column to `NULL`, a special R object indicating nothingness.
+
+```{r}
+frame$test <- NULL
+
+frame
+```
+
+## Data frame Recap
+
+1. Data frames are rectangular arrays of data
+2. A data frame is a list of vectors of all the same length
+3. Each column vector can have its own type
+4. Data frame can be created with the `data.frame` function
+5. List style subsetting works for data frames (`[`, `[[`, `$`)
+6. Array style subsetting works for data frame (`[,]`)
+7. Columns can be added by subset assignment
+8. Columns can be removed by assigning `NULL` to a column
+
+## Finally, An Example
+
+Before we start we need some data to look at. Creating data frames in R is a pain, so we're going
+to need a function to read in data. The most common type of data you will access is in the `csv`
+format.
+
+To get some example data, we will use the `read.csv` function, with no added arguments. This is only possible becasue the csv is nicely formatted. Many hours can be spent learning the ins and outs of reading data.frames into R, so I will
+gloss over this problem. 
+
+```{r}
+ex <- 
+  read.csv("/hpf/largeprojects/MICe/chammill/presentations/summer_school2017/intro_to_R/fixed_datatable_IRdose.csv", 
+           stringsAsFactors = FALSE)
+```
+
+*Note there is one added argument - `stringsAsFactors`. Remembering to set this to `FALSE` will save many headaches. In fact it is a good practice to run `options(stringsAsFactors = FALSE)` at the beginning of R session/script*
+
+
+A useful tool for getting a sense of what's in any R object is the `str` function. This tells you about the structure of the object.
+
+```{r}
+str(ex)
+```
+
+Here we can see there is are 10 columns, some of which are numeric, some strings (character). Pardon the ugly printing of the filenames.
+
+You can also get a sense for what's in a data frame by looking at the column names
+
+```{r}
+names(ex)
+```
+
+## First Statistics
+
+R comes with a rich library of functions that tell you interesting properties about vectors.
+
+Here's a quick assortment of some summary functions built in to R
+
+```{r}
+length(ex$Dose)
+mean(ex$Dose)
+median(ex$Dose)
+sd(ex$Dose)
+min(ex$Dose)
+range(ex$Dose)
+summary(ex$Dose)
+
+unique(ex$Sex)
+table(ex$Sex)
+```
+
+## A Simple Linear Model
+
+For a toy example let's test the hypothesis that the dose adminstered to the mice doesn't depend on sex.
+
+R provides a convenient model specification format, often called the formula interface:
+
+<response> ~ <covariate 1> + <covariate 2>
+
+```{r}
+lmod <- lm(Dose ~ Sex, data = ex)
+
+lmod
+summary(lmod)
+```
+
