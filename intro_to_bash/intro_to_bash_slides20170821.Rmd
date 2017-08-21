@@ -155,7 +155,7 @@ less ~/.bashrc
 
 ## The MICe treasure hunt
 
-```{r}
+```{r, eval = FALSE}
 mkdir /tmp/treasure
 cd /tmp/treasure
 perl /axiom2/projects/software/arch/linux-3_2_0-36-generic-x86_64-eglibc-2_15/bin/treasureHunt.pl
@@ -164,13 +164,13 @@ perl /axiom2/projects/software/arch/linux-3_2_0-36-generic-x86_64-eglibc-2_15/bi
 
 Let's have a look at the first clue
 
-```{r}
+```{r, eval = FALSE}
 ls 
 ```
 
 when done you can delete directory 
 
-```{r}
+```{r, eval = FALSE}
 rm -rf /tmp/treasure
 ```
 

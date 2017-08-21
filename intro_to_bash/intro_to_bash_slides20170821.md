@@ -97,9 +97,9 @@ ls -l  # gives you long output (who created file, date of creation, size of file
 
     ## total 488
     ## -rw-r--r-- 1 chammill mice 99491 Aug 21 15:59 bash_tutorial.pdf
-    ## -rw-r--r-- 1 chammill mice 25893 Aug 21 16:03 intro_to_bash_slides20170821.html
-    ## -rw-r--r-- 1 chammill mice  5981 Aug 21 16:03 intro_to_bash_slides20170821.md
-    ## -rw-r--r-- 1 chammill mice  3811 Aug 21 16:05 intro_to_bash_slides20170821.Rmd
+    ## -rw-r--r-- 1 chammill mice 25705 Aug 21 16:10 intro_to_bash_slides20170821.html
+    ## -rw-r--r-- 1 chammill mice  5796 Aug 21 16:10 intro_to_bash_slides20170821.md
+    ## -rw-r--r-- 1 chammill mice  3853 Aug 21 16:09 intro_to_bash_slides20170821.Rmd
     ## -rw-r--r-- 1 chammill mice  3757 Aug 21 15:47 intro_to_bash_slides20170821.Rmd~
 
 Paths
@@ -190,12 +190,6 @@ Let's have a look at the first clue
 ``` bash
 ls 
 ```
-
-    ## bash_tutorial.pdf
-    ## intro_to_bash_slides20170821.html
-    ## intro_to_bash_slides20170821.md
-    ## intro_to_bash_slides20170821.Rmd
-    ## intro_to_bash_slides20170821.Rmd~
 
 when done you can delete directory
 
