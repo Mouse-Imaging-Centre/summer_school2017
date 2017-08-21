@@ -1,0 +1,183 @@
+---
+tile: Intro to bash
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(engine = 'bash')
+```
+
+## What is a command line or terminal?
+
+- Open terminal 
+	- on Mac: command + space -> Terminal
+	- on Windows: use ssh client, e.g. cygwin 
+- Basically a text-based interface
+- Can enter commands & feedback given as text
+
+### why bother?
+
+- manipulate data
+- run registration pipeline in terminal
+- faster to navigate through folders
+
+## ssh
+
+- you can use terminal to log into other computers connected to same network
+- ssh: secure shell
+- login to network here using following username + password
+
+```{r, eval = FALSE}
+dvousden  password: dvousden123
+ssh username@location
+ssh -X username@location
+```
+
+- first make sure everyone connected to wifi (Chris)
+- now try logging into our network
+
+```{r, eval = FALSE}
+ssh username@172.16.128.140
+```
+
+
+## The Shell, Bash
+- within a terminal you have what is known as shell: defines how terminal will behave & runs commands
+- most common is bash
+- can check type of shell you have by looking at environment variable.
+- use echo command
+
+```{r}
+echo $SHELL
+```
+
+- make sure says ‘bash’ 
+
+## Shortcuts
+
+- commands stored in history
+- push up arrow to go backwards through history
+- `history` 
+- ctrl + R to search history 
+
+## Moving around the system 
+
+```{r} 
+pwd  # tells you where you are, same structure as folders that you’re used to clicking
+ls  # shows you what’s there 
+```
+
+## getting help &  giving commands arguments
+
+- a lot of commands also take arguments
+- commands also have help pages or manuals to show you how to use them
+- `man` 
+- q to quit
+
+```
+ls [-ABCFG…] [file ..]
+
+- tells you that ls ‘list directory contents’
+- possible arguments are all the letters
+- you can also give ls the name of a particular file and it will give you information about that file
+```
+
+```{r} 
+ls -l  # gives you long output (who created file, date of creation, size of file) 
+#ls -l DIRECTORY # shows you what’s in that directory 
+```
+
+## Paths
+
+- whenever we refer to a file or directory on a command line, we have to use that file’s path
+- path is like the address, where to find the file or folder
+- absolute vs. relative paths
+- directories are organized hierarchically
+	- top is root /
+	- absolute paths specify location starting from root
+
+```{r, eval = FALSE}
+ls /home/Dulcie/Documents 
+```
+
+- relative paths specify location in relation to where you currently are
+
+```{r, eval = FALSE}
+#ls Documents 
+ls ~   # shortcut for home directory
+ls .    # shortcut for current directory
+ls ../  # shortcut for parent directory 
+```
+  
+## Moving around
+
+```{r}
+pwd
+cd ..
+pwd 
+```
+- shortcut: tab completion 
+
+```{r}
+# cd Doc   # show tab completion
+```
+
+## Create new directory 
+
+```{r, eval = FALSE}
+mkdir banana
+cd banana 
+pwd
+ls
+cd ..
+rmdir banana
+```
+
+## Environment variables
+
+- There are a number of different environment variables
+- one important one is called PATH 
+
+```{r} 
+echo $PATH
+```
+
+- this tells the computer where to look for programs and software packages
+- if you are having problems running a certain program, sometimes it’s because you haven’t
+told the computer where to look
+
+- environment variables can be specified in .bashrc 
+
+```{r, eval = FALSE} 
+less ~/.bashrc
+```
+
+## The MICe treasure hunt
+
+```{r}
+mkdir /tmp/treasure
+cd /tmp/treasure
+perl /axiom2/projects/software/arch/linux-3_2_0-36-generic-x86_64-eglibc-2_15/bin/treasureHunt.pl
+```
+
+
+Let's have a look at the first clue
+
+```{r}
+ls 
+```
+
+when done you can delete directory 
+
+```{r}
+rm -rf /tmp/treasure
+```
+
+## Troubleshooting login
+
+Offending RSA key in /Users/Dulcie/.ssh/known_hosts:12
+
+```
+ sed -i '6d' ~/.ssh/known_hosts
+ perl -pi -e 's/\Q$_// if ($. == 6);' ~/.ssh/known_hosts
+```
