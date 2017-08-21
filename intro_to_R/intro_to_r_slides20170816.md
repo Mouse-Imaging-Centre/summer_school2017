@@ -16,16 +16,121 @@ Sys.setenv(PATH = "/axiom2/projects/software/arch/linux-precise/bin/:/OGS/bin/li
 Intro To R
 ----------
 
-R is a statistical computing environment and an interpretted programming language "designed by statisticians for statisticians"^TM
+R is a statistical computing environment and programming language designed by for statistics by statisticians.
 
-You don't need to be a programmer to use R
+Rstudio Interface
+-----------------
 
-But it helps to know some programming.
+-   Rstudio server, available through a web interface
+-   Panes for
+    1.  Scripts
+    2.  R console
+    3.  Environment, History, Git
+    4.  Help, Plots, and Packages
 
-R Basics
---------
+The R Console
+-------------
 
-R is all about data and transformations of data. The most fundamental type of data in R is the **vector**. A vector is a one dimensional array of information.
+-   R is an interpretted programming language (no compilation necessary)
+-   Frequently engaged via an interactive console (REPL)
+-   Type commands, get quick feedback
+-   Useful as a calculator
+
+First commands
+--------------
+
+Let's try asking R some simple math problems
+
+``` r
+6 * 12
+```
+
+    ## [1] 72
+
+Entering the above command asks the R interpretter to read the command, evaluate the code, and print the results to the console.
+
+R has many basic operators
+
+``` r
+6 + 12 
+```
+
+    ## [1] 18
+
+``` r
+18 / 3
+```
+
+    ## [1] 6
+
+``` r
+2^3
+```
+
+    ## [1] 8
+
+``` r
+2^(-1/3)
+```
+
+    ## [1] 0.7937005
+
+``` r
+log(4)
+```
+
+    ## [1] 1.386294
+
+R functions are required to provide documentation about what they do:
+
+``` r
+?log
+```
+
+R can also work naturally with text data
+
+``` r
+"Hi There!"
+```
+
+    ## [1] "Hi There!"
+
+Variables
+---------
+
+R can remember the results of computations and these can be used later. In R we use the assignment operator `<-` to assign values to a variable name
+
+``` r
+a <- 5
+```
+
+We can then use those variables later
+
+``` r
+a * 10
+```
+
+    ## [1] 50
+
+Names can be almost anything you want, but they need to start with a letter, but may contain the special characters `_` and `.` as well as numbers
+
+Intrepretter Recap
+------------------
+
+-   R is a computing environment and interpretted programming language
+-   R provides a **R**ead **E**val **P**rint **L**oop (REPL)
+-   R works great as a command line calculator
+-   R allows you to assign values to variables
+
+R Data Types
+------------
+
+To get a feel for R it's useful to know some of the common ways R stores information. Let's start with the simplest.
+
+Vectors
+-------
+
+The most fundamental type of data in R is the **vector**. A vector is a one dimensional array of information.
 
 We'll take the R provided vector `LETTERS` as an example.
 
@@ -38,9 +143,7 @@ LETTERS
     ##  [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q"
     ## [18] "R" "S" "T" "U" "V" "W" "X" "Y" "Z"
 
-R is an interpretted language. When you issue a command in the console, the R interpretter will give output any response it might have.
-
-The above line asks the R interpretter to print the value of `LETTERS`. R will print the result of any computation aprovided at the command line automatically. Printing to the console can also be specified manually
+When interacting with the console, R will print the value of any computation, you can also print explicitly.
 
 ``` r
 print(LETTERS)
@@ -105,6 +208,28 @@ LETTERS[1][1][1][1]
 
     ## [1] "A"
 
+Looping
+-------
+
+Often you will want to perform some computation for each element of an R vector, the simplest way to accomplish this is with a `for` loop.
+
+``` r
+for(i in 1:10){
+    print(i)
+}
+```
+
+    ## [1] 1
+    ## [1] 2
+    ## [1] 3
+    ## [1] 4
+    ## [1] 5
+    ## [1] 6
+    ## [1] 7
+    ## [1] 8
+    ## [1] 9
+    ## [1] 10
+
 Recap Vectors
 -------------
 
@@ -113,31 +238,99 @@ Recap Vectors
 3.  Vectors can be subset with `[` by single elements, vectors of elements, and removal
 4.  R indexes from 1
 5.  There are no scalars
+6.  Vector elements can be looped over with `for(var in vec)`
 
-Assignment
-----------
+Matrices
+--------
 
-Often you want to save the result of a computation. R, like all languages, provides a mechanism to assign values to names (Pro Secret: It's actually the opposite). Names need to start with a letter, but may contain the special characters `_` and `.` as well as numbers
-
-To assign values in R we use the `<-` assignment operator. Yet another case where R is a bit weird.
+Matrices are the 2 dimensional version of R vectors. In R matrices are essentially vectors with an extra attribute indicating the dimensions of the matrix. Matrices can be constructed with the `matrix` function.
 
 ``` r
-an_appropriate_name1 <- 1:5
+m <- matrix(1:10, ncol = 2, nrow = 5)
+m
+```
 
-an_appropriate_name1
+    ##      [,1] [,2]
+    ## [1,]    1    6
+    ## [2,]    2    7
+    ## [3,]    3    8
+    ## [4,]    4    9
+    ## [5,]    5   10
+
+Matrices can be subset
+
+``` r
+m[5,1]
+```
+
+    ## [1] 5
+
+Rows and columns can be extracted by leaving index arguments empty
+
+``` r
+m[1,]
+```
+
+    ## [1] 1 6
+
+``` r
+m[,1]
 ```
 
     ## [1] 1 2 3 4 5
 
-And elements of vectors can be assigned in place
+Matrices can also be subset just like vectors
 
 ``` r
-an_appropriate_name1[1] <- 10
-
-an_appropriate_name1
+m[5]
 ```
 
-    ## [1] 10  2  3  4  5
+    ## [1] 5
+
+Information about the matrix can be extracted
+
+``` r
+nrow(m)
+```
+
+    ## [1] 5
+
+``` r
+ncol(m)
+```
+
+    ## [1] 2
+
+``` r
+length(m)
+```
+
+    ## [1] 10
+
+``` r
+dim(m)
+```
+
+    ## [1] 5 2
+
+Recap Matrices
+--------------
+
+1.  Matrices can be constructed with the `matrix` function
+2.  Matrices can be subset by rows and columns `[,]`
+3.  Matrices can be subset like vectors `[`
+4.  Matrices have functions that tell you about their structure
+
+A Plot
+------
+
+R makes plotting very easy, it has a multipurpose `plot`, we don't have time to cover plotting in much detail, but a simple scatter plot can be produced with
+
+``` r
+plot(m[,1], m[,2])
+```
+
+![](intro_to_r_slides20170816_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-20-1.png)
 
 Lists
 -----
@@ -199,16 +392,15 @@ l$a
 
     ## [1] 5
 
-Assignment and Lists Recap
---------------------------
+Lists Recap
+-----------
 
-1.  Values can be assigned to names with the `<-` operator
-2.  Elements of vectors can be assigned in place
-3.  Lists are collections of arbitrary elements
-4.  Lists can be created with the `list` function with either named or unnamed elements
-5.  Lists can be subset and assigned like vectors
-6.  List elements can be accessed with `[[` operators
-7.  Named list elements can be accessed with the `$` operator
+1.  Elements of vectors can be assigned in place
+2.  Lists are collections of arbitrary elements
+3.  Lists can be created with the `list` function with either named or unnamed elements
+4.  Lists can be subset and assigned like vectors
+5.  List elements can be accessed with `[[` operators
+6.  Named list elements can be accessed with the `$` operator
 
 Data Frames
 -----------
@@ -224,26 +416,26 @@ frame
 ```
 
     ##    subject group measurement
-    ## 1        1     A   1.2324274
-    ## 2        2     B   1.0043039
-    ## 3        3     B   0.5513703
-    ## 4        4     A  -0.6494055
-    ## 5        5     B   0.3623714
-    ## 6        6     B  -1.1274965
-    ## 7        7     B   0.8210316
-    ## 8        8     A  -0.5428193
-    ## 9        9     B  -1.8431269
-    ## 10      10     B  -2.9294178
-    ## 11      11     A   0.1484543
-    ## 12      12     B  -0.1895298
-    ## 13      13     B  -1.5272545
-    ## 14      14     B  -0.5400599
-    ## 15      15     B  -0.6554384
-    ## 16      16     B   0.4841818
-    ## 17      17     A  -1.1227627
-    ## 18      18     B  -0.5647752
-    ## 19      19     B   1.9535241
-    ## 20      20     A  -0.3197201
+    ## 1        1     A  0.30040276
+    ## 2        2     B  0.44273501
+    ## 3        3     A -0.21580564
+    ## 4        4     A  0.82806059
+    ## 5        5     A  1.86581789
+    ## 6        6     A -0.23719340
+    ## 7        7     A -0.26707922
+    ## 8        8     A  2.29268693
+    ## 9        9     B  0.08978343
+    ## 10      10     B  2.36266101
+    ## 11      11     B -0.95030214
+    ## 12      12     B -1.16312290
+    ## 13      13     B  0.63489399
+    ## 14      14     A -0.07858648
+    ## 15      15     B -1.02658706
+    ## 16      16     A -0.56348665
+    ## 17      17     A -0.40243976
+    ## 18      18     A  0.82122600
+    ## 19      19     A  0.83616113
+    ## 20      20     A  0.85154585
 
 *Note the bonus functions `sample` (choosing random elements from a vector), and `rnorm` (normally distributed random numbers), don't worry about them yet*
 
@@ -253,10 +445,10 @@ I can treat my `data.frame` exactly like the `list` that it is, and extract the 
 frame$measurement
 ```
 
-    ##  [1]  1.2324274  1.0043039  0.5513703 -0.6494055  0.3623714 -1.1274965
-    ##  [7]  0.8210316 -0.5428193 -1.8431269 -2.9294178  0.1484543 -0.1895298
-    ## [13] -1.5272545 -0.5400599 -0.6554384  0.4841818 -1.1227627 -0.5647752
-    ## [19]  1.9535241 -0.3197201
+    ##  [1]  0.30040276  0.44273501 -0.21580564  0.82806059  1.86581789
+    ##  [6] -0.23719340 -0.26707922  2.29268693  0.08978343  2.36266101
+    ## [11] -0.95030214 -1.16312290  0.63489399 -0.07858648 -1.02658706
+    ## [16] -0.56348665 -0.40243976  0.82122600  0.83616113  0.85154585
 
 Observe that measurment is in fact a vector of numbers.
 
@@ -266,7 +458,7 @@ Data frames can also be subset by row and columns simultaneously to extract elem
 frame[5, "group"]
 ```
 
-    ## [1] B
+    ## [1] A
     ## Levels: A B
 
 And we can see that we can pull values out of the data frame. This notation can also be used to get entire rows and columns
@@ -276,13 +468,13 @@ frame[5,]
 ```
 
     ##   subject group measurement
-    ## 5       5     B   0.3623714
+    ## 5       5     A    1.865818
 
 ``` r
 frame[,2]
 ```
 
-    ##  [1] A B B A B B B A B B A B B B B B A B B A
+    ##  [1] A B A A A A A A B B B B B A B A A A A A
     ## Levels: A B
 
 New columns can be added by subset assignment
@@ -293,27 +485,27 @@ frame$test <- rnorm(10)
 frame
 ```
 
-    ##    subject group measurement        test
-    ## 1        1     A   1.2324274  0.66751963
-    ## 2        2     B   1.0043039  0.09711311
-    ## 3        3     B   0.5513703  0.43984527
-    ## 4        4     A  -0.6494055 -0.32345796
-    ## 5        5     B   0.3623714 -0.47167342
-    ## 6        6     B  -1.1274965 -0.93658025
-    ## 7        7     B   0.8210316  0.15564069
-    ## 8        8     A  -0.5428193  0.25204733
-    ## 9        9     B  -1.8431269 -0.80231671
-    ## 10      10     B  -2.9294178 -0.46787267
-    ## 11      11     A   0.1484543  0.66751963
-    ## 12      12     B  -0.1895298  0.09711311
-    ## 13      13     B  -1.5272545  0.43984527
-    ## 14      14     B  -0.5400599 -0.32345796
-    ## 15      15     B  -0.6554384 -0.47167342
-    ## 16      16     B   0.4841818 -0.93658025
-    ## 17      17     A  -1.1227627  0.15564069
-    ## 18      18     B  -0.5647752  0.25204733
-    ## 19      19     B   1.9535241 -0.80231671
-    ## 20      20     A  -0.3197201 -0.46787267
+    ##    subject group measurement       test
+    ## 1        1     A  0.30040276 -0.5508692
+    ## 2        2     B  0.44273501 -0.8253362
+    ## 3        3     A -0.21580564  1.4094635
+    ## 4        4     A  0.82806059  2.0082714
+    ## 5        5     A  1.86581789  1.4345708
+    ## 6        6     A -0.23719340  1.5758287
+    ## 7        7     A -0.26707922  0.3959423
+    ## 8        8     A  2.29268693  0.5572102
+    ## 9        9     B  0.08978343  0.9470980
+    ## 10      10     B  2.36266101 -1.3106516
+    ## 11      11     B -0.95030214 -0.5508692
+    ## 12      12     B -1.16312290 -0.8253362
+    ## 13      13     B  0.63489399  1.4094635
+    ## 14      14     A -0.07858648  2.0082714
+    ## 15      15     B -1.02658706  1.4345708
+    ## 16      16     A -0.56348665  1.5758287
+    ## 17      17     A -0.40243976  0.3959423
+    ## 18      18     A  0.82122600  0.5572102
+    ## 19      19     A  0.83616113  0.9470980
+    ## 20      20     A  0.85154585 -1.3106516
 
 And columns can be erased by setting the column to `NULL`, a special R object indicating nothingness.
 
@@ -324,26 +516,26 @@ frame
 ```
 
     ##    subject group measurement
-    ## 1        1     A   1.2324274
-    ## 2        2     B   1.0043039
-    ## 3        3     B   0.5513703
-    ## 4        4     A  -0.6494055
-    ## 5        5     B   0.3623714
-    ## 6        6     B  -1.1274965
-    ## 7        7     B   0.8210316
-    ## 8        8     A  -0.5428193
-    ## 9        9     B  -1.8431269
-    ## 10      10     B  -2.9294178
-    ## 11      11     A   0.1484543
-    ## 12      12     B  -0.1895298
-    ## 13      13     B  -1.5272545
-    ## 14      14     B  -0.5400599
-    ## 15      15     B  -0.6554384
-    ## 16      16     B   0.4841818
-    ## 17      17     A  -1.1227627
-    ## 18      18     B  -0.5647752
-    ## 19      19     B   1.9535241
-    ## 20      20     A  -0.3197201
+    ## 1        1     A  0.30040276
+    ## 2        2     B  0.44273501
+    ## 3        3     A -0.21580564
+    ## 4        4     A  0.82806059
+    ## 5        5     A  1.86581789
+    ## 6        6     A -0.23719340
+    ## 7        7     A -0.26707922
+    ## 8        8     A  2.29268693
+    ## 9        9     B  0.08978343
+    ## 10      10     B  2.36266101
+    ## 11      11     B -0.95030214
+    ## 12      12     B -1.16312290
+    ## 13      13     B  0.63489399
+    ## 14      14     A -0.07858648
+    ## 15      15     B -1.02658706
+    ## 16      16     A -0.56348665
+    ## 17      17     A -0.40243976
+    ## 18      18     A  0.82122600
+    ## 19      19     A  0.83616113
+    ## 20      20     A  0.85154585
 
 Data frame Recap
 ----------------
@@ -512,3 +704,14 @@ summary(lmod)
     ## Residual standard error: 2.614 on 39 degrees of freedom
     ## Multiple R-squared:  0.006144,   Adjusted R-squared:  -0.01934 
     ## F-statistic: 0.2411 on 1 and 39 DF,  p-value: 0.6262
+
+Advanced topics
+---------------
+
+Feel free to ask me about any of the following over the course of the week
+
+-   Packages
+-   Writing functions
+-   Functional programming tools (apply family)
+-   Tidyverse
+-   Plotting, for real

@@ -18,16 +18,89 @@ Sys.setenv(PATH = "/axiom2/projects/software/arch/linux-precise/bin/:/OGS/bin/li
 
 ## Intro To R
 
-R is a statistical computing environment and an interpretted programming language
-"designed by statisticians for statisticians"^TM
+R is a statistical computing environment and programming language
+designed by for statistics by statisticians.
 
-You don't need to be a programmer to use R
+## Rstudio Interface
 
-But it helps to know some programming.
+- Rstudio server, available through a web interface
+- Panes for
+    1. Scripts
+    2. R console
+    3. Environment, History, Git
+    4. Help, Plots, and Packages
 
-## R Basics
+## The R Console
 
-R is all about data and transformations of data.
+- R is an interpretted programming language (no compilation necessary)
+- Frequently engaged via an interactive console (REPL)
+- Type commands, get quick feedback
+- Useful as a calculator
+
+## First commands
+
+Let's try asking R some simple math problems
+
+```{r}
+6 * 12
+```
+Entering the above command asks the R interpretter to read the command,
+evaluate the code, and print the results to the console.
+
+R has many basic operators
+
+```{r}
+6 + 12 
+18 / 3
+2^3
+2^(-1/3)
+log(4)
+```
+
+R functions are required to provide documentation about what they do:
+
+```{r}
+?log
+```
+
+R can also work naturally with text data
+
+```{r}
+"Hi There!"
+```
+
+## Variables
+
+R can remember the results of computations and these can be used later.
+In R we use the assignment operator `<-` to assign values to a variable name
+
+```{r}
+a <- 5
+```
+
+We can then use those variables later
+
+```{r}
+a * 10
+```
+
+Names can be almost anything you want, but they need to start with a letter,
+but may contain the special characters `_` and `.` as well as numbers
+
+## Intrepretter Recap
+
+- R is a computing environment and interpretted programming language
+- R provides a **R**ead **E**val **P**rint **L**oop (REPL)
+- R works great as a command line calculator
+- R allows you to assign values to variables
+
+## R Data Types
+
+To get a feel for R it's useful to know some of the common ways R stores information.
+Let's start with the simplest.
+
+## Vectors
+
 The most fundamental type of data in R is the **vector**. 
 A vector is a one dimensional array of information.
 
@@ -38,12 +111,8 @@ Input the following line and press enter
 ```{r}
 LETTERS
 ```
-
-R is an interpretted language. When you issue a command in the console, the R interpretter will give
-output any response it might have.
-
-The above line asks the R interpretter to print the value of `LETTERS`. R will print the result of any computation
-aprovided at the command line automatically. Printing to the console can also be specified manually
+When interacting with the console, R will print the value of any computation, you can
+also print explicitly.
 
 ```{r}
 print(LETTERS)
@@ -64,6 +133,7 @@ R also provides a short hand for creating numerical sequences
 ```{r}
 1:5
 ```
+
 
 ## Subsetting
 
@@ -88,6 +158,17 @@ element vector
 LETTERS[1][1][1][1]
 ```
 
+## Looping
+
+Often you will want to perform some computation for each element of an R vector, the simplest
+way to accomplish this is with a `for` loop.
+
+```{r}
+for(i in 1:10){
+    print(i)
+}
+```
+
 ## Recap Vectors
 
 1. Vectors are 1D arrays of elements
@@ -95,27 +176,61 @@ LETTERS[1][1][1][1]
 3. Vectors can be subset with `[` by single elements, vectors of elements, and removal
 4. R indexes from 1
 5. There are no scalars
+6. Vector elements can be looped over with `for(var in vec)`
 
-## Assignment
+## Matrices
 
-Often you want to save the result of a computation. R, like all languages, provides a mechanism to
-assign values to names (Pro Secret: It's actually the opposite). Names need to start with a letter,
-but may contain the special characters `_` and `.` as well as numbers
-
-To assign values in R we use the `<-` assignment operator. Yet another case where R is a bit weird.
+Matrices are the 2 dimensional version of R vectors. In R matrices are essentially
+vectors with an extra attribute indicating the dimensions of the matrix. Matrices
+can be constructed with the `matrix` function.
 
 ```{r}
-an_appropriate_name1 <- 1:5
-
-an_appropriate_name1
+m <- matrix(1:10, ncol = 2, nrow = 5)
+m
 ```
 
-And elements of vectors can be assigned in place
+Matrices can be subset
 
 ```{r}
-an_appropriate_name1[1] <- 10
+m[5,1]
+```
 
-an_appropriate_name1
+Rows and columns can be extracted by leaving index arguments empty
+
+```{r}
+m[1,]
+m[,1]
+```
+
+Matrices can also be subset just like vectors
+
+```{r}
+m[5]
+```
+
+Information about the matrix can be extracted
+
+```{r}
+nrow(m)
+ncol(m)
+length(m)
+dim(m)
+```
+
+## Recap Matrices
+
+1. Matrices can be constructed with the `matrix` function
+2. Matrices can be subset by rows and columns `[,]`
+3. Matrices can be subset like vectors `[`
+4. Matrices have functions that tell you about their structure
+
+## A Plot
+
+R makes plotting very easy, it has a multipurpose `plot`, we don't have time to cover
+plotting in much detail, but a simple scatter plot can be produced with
+
+```{r}
+plot(m[,1], m[,2])
 ```
 
 ## Lists
@@ -152,15 +267,14 @@ operator.
 l$a
 ```
 
-## Assignment and Lists Recap
+## Lists Recap
 
-1. Values can be assigned to names with the `<-` operator
-2. Elements of vectors can be assigned in place
-3. Lists are collections of arbitrary elements
-4. Lists can be created with the `list` function with either named or unnamed elements
-5. Lists can be subset and assigned like vectors
-6. List elements can be accessed with `[[` operators
-7. Named list elements can be accessed with the `$` operator
+1. Elements of vectors can be assigned in place
+2. Lists are collections of arbitrary elements
+3. Lists can be created with the `list` function with either named or unnamed elements
+4. Lists can be subset and assigned like vectors
+5. List elements can be accessed with `[[` operators
+6. Named list elements can be accessed with the `$` operator
 
 ## Data Frames
 
@@ -291,4 +405,14 @@ lmod <- lm(Dose ~ Sex, data = ex)
 lmod
 summary(lmod)
 ```
+
+## Advanced topics
+
+Feel free to ask me about any of the following over the course of the week
+
+- Packages
+- Writing functions
+- Functional programming tools (apply family)
+- Tidyverse
+- Plotting, for real
 
