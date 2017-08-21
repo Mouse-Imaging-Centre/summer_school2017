@@ -2,7 +2,7 @@
 What is a command line or terminal?
 -----------------------------------
 
--   Great overview and tutorial: [](bash_tutorial.pdf)
+-   [Great overview and tutorial](./bash_tutorial.pdf)
 -   Open terminal
     -   on Mac: command + space -&gt; Terminal
     -   on Windows: use ssh client, e.g. cygwin
@@ -97,9 +97,9 @@ ls -l  # gives you long output (who created file, date of creation, size of file
 
     ## total 488
     ## -rw-r--r-- 1 chammill mice 99491 Aug 21 15:59 bash_tutorial.pdf
-    ## -rw-r--r-- 1 chammill mice 25554 Aug 21 15:52 intro_to_bash_slides20170821.html
-    ## -rw-r--r-- 1 chammill mice  5634 Aug 21 15:52 intro_to_bash_slides20170821.md
-    ## -rw-r--r-- 1 chammill mice  3811 Aug 21 16:01 intro_to_bash_slides20170821.Rmd
+    ## -rw-r--r-- 1 chammill mice 25893 Aug 21 16:03 intro_to_bash_slides20170821.html
+    ## -rw-r--r-- 1 chammill mice  5981 Aug 21 16:03 intro_to_bash_slides20170821.md
+    ## -rw-r--r-- 1 chammill mice  3811 Aug 21 16:05 intro_to_bash_slides20170821.Rmd
     ## -rw-r--r-- 1 chammill mice  3757 Aug 21 15:47 intro_to_bash_slides20170821.Rmd~
 
 Paths

@@ -9,7 +9,7 @@ knitr::opts_chunk$set(engine = 'bash')
 
 ## What is a command line or terminal?
 
-- Great overview and tutorial: [](bash_tutorial.pdf)
+- [Great overview and tutorial](./bash_tutorial.pdf)
 - Open terminal 
 	- on Mac: command + space -> Terminal
 	- on Windows: use ssh client, e.g. cygwin 
