@@ -6,7 +6,7 @@ output: github_document
 ## Getting set up
 
 1. WiFi
-2. Open firefox to 172.16.128.140:8787
+2. Open your browser to 172.16.128.140:8787
 3. Log in with your MICe credentials
 4. Set you paths:
 
@@ -397,7 +397,7 @@ For a toy example let's test the hypothesis that the dose adminstered to the mic
 
 R provides a convenient model specification format, often called the formula interface:
 
-<response> ~ <covariate 1> + <covariate 2>
+\<response\> ~ \<covariate 1\> + \<covariate 2\>
 
 ```{r}
 lmod <- lm(Dose ~ Sex, data = ex)
