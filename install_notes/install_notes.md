@@ -64,8 +64,8 @@ R
 ```
 
 ``` r
-install.packages(“devtools”)
-devtools::install_github(“Mouse-Imaging-Centre/RMINC”, dependencies = TRUE)
+install.packages("devtools")
+devtools::install_github("Mouse-Imaging-Centre/RMINC", dependencies = TRUE)
 ```
 
 To test the install run
