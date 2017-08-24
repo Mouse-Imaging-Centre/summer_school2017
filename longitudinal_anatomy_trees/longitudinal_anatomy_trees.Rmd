@@ -1,0 +1,120 @@
+---
+title: "R Notebook"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+# Data preparation
+
+Libraries
+
+```{r}
+library(RMINC)
+library(ggplot2)
+library(lme4)
+```
+
+Read in bits of data
+
+```{r}
+## Set a data path
+data_path <- "/hpf/largeprojects/MICe/chammill/presentations/summer_school2017/longitudinal_analysis/comparing_reg_chain_and_tamarack/"
+
+gf <- read.csv(file.path(data_path, "../tamarack_det.csv"))
+load(file.path(data_path, "../anatAbsVols.RData"))
+```
+
+Set anatomy definitions
+
+```{r}
+defsFile <- "/hpf/largeprojects/MICe/tools/atlases/Dorr_2008_Steadman_2013_Ullmann_2013/mappings/Dorr_2008_Steadman_2013_Ullmann_2013_mapping_of_labels.csv"
+```
+
+And make a hierarchical tree
+
+```{r}
+AllenDefs <- "/hpf/largeprojects/MICe/tools/atlases/Allen_Brain/Allen_hierarchy_definitions.json"
+hdefs <- makeMICeDefsHierachical(defsFile, AllenDefs)
+```
+
+Add volumes
+
+```{r}
+hanat <- addVolumesToHierarchy(hdefs, anatAbsVols)
+```
+
+# Slope type
+
+```{r, warnings = FALSE}
+library(broom)
+library(splines)
+library(data.tree)
+slopeComp <- Clone(hanat)
+slopeComp$Do(function(brainROI) {
+  gf$volume <- brainROI$volumes
+  l1 <- lmer(volume ~ ns(timepoint, 1) + (1|mouse), data=gf, REML=FALSE)
+  l2 <- lmer(volume ~ ns(timepoint, 2) + (1|mouse), data=gf, REML=FALSE)
+  l3 <- lmer(volume ~ ns(timepoint, 3) + (1|mouse), data=gf, REML=FALSE)
+  brainROI$l1v2 <- tidy(anova(l1, l2))$statistic[2]
+  brainROI$l2v3 <- tidy(anova(l2, l3))$statistic[2]
+})
+```
+
+```{r}
+hanatView(slopeComp, "l2v3", low=10, high=1000)
+```
+
+```{r}
+gf$volume <- FindNode(hanat, "Posterior parietal association areas")$volumes
+qplot(timepoint, volume, data=gf) + geom_smooth(method="lm", formula=y~ns(x,2)) +
+  geom_smooth(method="lm", formula=y~ns(x,3), col=I("red"))
+```
+
+```{r}
+anatVolume <- mincArray(mincGetVolume("/hpf/largeprojects/MICe/chammill/presentations/summer_school2017/longitudinal_analysis/DSU_atlas/Dorr_2008_Steadman_2013_Ullmann_2013_on_MEMRI_C57BL6_P43_average.mnc"))
+labelVolume <- mincArray(mincGetVolume("/hpf/largeprojects/MICe/chammill/presentations/summer_school2017/longitudinal_analysis/DSU_atlas/Dorr_2008_Steadman_2013_Ullmann_2013_on_MEMRI_C57BL6_P43_labels.mnc"))
+
+vol <- hanatToVolume(slopeComp, labelVolume, "l2v3")
+mincPlotSliceSeries(anatVolume, vol, low=10, high=100, anatLow=700, anatHigh=1400, begin=50, end=-50)
+```
+
+
+```{r}
+chivals <- slopeComp$Get("l2v3")
+qvals <- p.adjust(pchisq(chivals, 2, lower.tail=F), "BY")
+slopeComp$Set(l2v3q = qvals)
+slopeComp$Set(l2v3ql10 = -log10(qvals))
+hanatView(slopeComp, "l2v3ql10", low=1.3, high=4)
+```
+
+
+# Individual growth patterns
+
+```{r, warning=FALSE}
+indComp <- Clone(hanat)
+indComp$Do(function(x) {
+  gf$volume <- x$volumes
+  gfwt <- subset(gf, genotype=="WT" & timepoint <= 12)
+  l1 <- lmer(volume ~ ns(timepoint, 2) + (1|mouse), data=gfwt, REML=F)
+  l2 <- lmer(volume ~ ns(timepoint, 2) + (timepoint|mouse), data=gfwt, REML=F)
+  x$indvgroup <- tidy(anova(l1, l2))$statistic[2]
+})
+```
+
+```{r}
+hanatView(indComp, "indvgroup", low=3, high=10)
+```
+
+```{r}
+vol <- hanatToVolume(indComp, labelVolume, "indvgroup")
+mincPlotSliceSeries(anatVolume, vol, low=2, high=10, anatLow=700, anatHigh=1400, begin=50, end=-50)
+```
+
+```{r}
+indComp2 <- Clone(indComp)
+Prune(indComp2, function(x) !startsWith(x$name, "left") & !startsWith(x$name, "right"))
+vol <- hanatToVolume(indComp2, labelVolume, "indvgroup")
+mincPlotSliceSeries(anatVolume, vol, low=2, high=10, anatLow=700, anatHigh=1400, begin=50, end=-50)
+```
+
