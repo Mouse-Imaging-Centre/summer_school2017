@@ -46,7 +46,7 @@ hanat <- addVolumesToHierarchy(hdefs, anatAbsVols)
 
 # Slope type
 
-```{r, warnings = FALSE}
+```{r, warning = FALSE}
 library(broom)
 library(splines)
 library(data.tree)
