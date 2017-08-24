@@ -18,6 +18,9 @@ summer school sessions.
 
 - [Intro to Registration](/summer_school2017/intro_to_registration/MISSregistration.pdf) - Darren Fernandes
 - [Install Notes](/summer_school2017/install_notes/install_notes) - Chris Hammill
+
+## Thursday
+
 - [Longitudinal Analysis](/summer_school2017/longitudinal_slides/MISS_Longitudinal_Analysis.pdf) - Lily Qiu and Darren Fernandes
 - [Longitudinal Registration](/summer_school2017/longitudinal_slides/MISS_Longitudinal_Registration.pdf) - Lily Qiu and Darren Fernandes
 - [Longitudinal Analysis Demo](https://github.com/Mouse-Imaging-Centre/summer_school2017/tree/master/longitudinal_analysis) - Darren Fernandes and Lily Qiu
