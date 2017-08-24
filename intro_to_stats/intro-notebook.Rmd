@@ -1,0 +1,221 @@
+---
+title: "Intro to stats"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+# Load the data and prepare the environment
+
+First, read in the file that contains the description of all the scans in the irradiation study that we will be using as our example dataset.
+
+```{r}
+gf <- read.csv("/hpf/largeprojects/MICe/jason/MISS2017/intro-stats/fixed_datatable_IRdose.csv")
+```
+
+Take a look at the data in that file:
+
+```{r}
+names(gf)
+```
+
+The last three columns contain the filenames for the Jacobian determinants, either with or without blurring. Sex and Dose are the most interesting covariates here.
+
+```{r}
+table(gf$Dose, gf$Sex)
+```
+
+So about 5 males and 5 females for each irradiation dose.
+
+# Exploring the highest dose data
+
+Starting simple, let's just look at a dose of 0 vs 7, for now.
+
+```{r}
+d7vsd0 <- subset(gf, Dose %in% c(0, 7))
+table(d7vsd0$Dose, d7vsd0$Sex)
+```
+
+To do further analyses and see the results, we need to load two more bits of data: the background non-linear average on which we will display results, and the labels for computing volumes.
+
+```{r}
+library(RMINC)
+anatFile <- "/projects/moush/lbernas/Irradiation_behaviour_project/fixed_build_masked_23mar13_nlin/nlin-3.mnc"
+
+labelFile <-
+    paste0("/hpf/largeprojects/MICe/jason/MISS2017/intro-stats/atlas-registration/"
+         , "pipeline-18-08-2017-at-07-08-48_processed/nlin-3/voted.mnc")
+
+defsFile <-
+    paste0("/hpf/largeprojects/MICe/tools/atlases/"
+         , "Dorr_2008_Steadman_2013_Ullmann_2013_Richards_2011_Qiu_2016_Egan_2015_40micron/"
+         , "mappings/DSURQE_40micron_R_mapping.csv")
+```
+
+# Linear model at every voxel
+
+```{r}
+vs <- mincLm(Jacobfile_scaled0.2 ~ Dose, d7vsd0, mask=labelFile)
+```
+
+Let's explore the data. First, get a sense of the background range for the anatomical volume, after reading it in, of course.
+
+```{r}
+anatVolume <- mincArray(mincGetVolume(anatFile))
+hist(anatVolume)
+```
+
+
+```{r, eval = FALSE}
+d7vsd0$DoseFactor <- as.factor(d7vsd0$Dose)
+launch_shinyRMINC(vs, anatVolume, anatLow=9, anatHigh=15, plotcolumns = d7vsd0)
+```
+
+
+And plot the data with an n of `r nrow(gf)` in my sample.
+
+```{r}
+mincPlotSliceSeries(anatVolume, mincArray(vs, "tvalue-Dose"), anatLow=9, anatHigh=15, low=2, high=7, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+```
+
+Now, use the False Discovery Rate to correct for multiple comparisons
+
+```{r}
+qvs <- mincFDR(vs, mask=labelFile)
+```
+
+Let's see the thresholds:
+
+```{r}
+qvs
+```
+
+And plot at that threshold
+
+```{r}
+mincPlotSliceSeries(anatVolume, mincArray(vs, "tvalue-Dose"), anatLow=9, anatHigh=15, low=3.42, high=7, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+```
+
+Or plot the q values directly
+
+```{r}
+mincPlotSliceSeries(anatVolume, -log10(mincArray(qvs, "tvalue-Dose")), anatLow=9, anatHigh=15, low=1.3, high=3, symmetric=F, begin=50, end=-40, legend="-log10 q value", plottitle = "Dose (7 vs 0 only)")
+```
+
+Or the same, but with direction added again:
+
+```{r}
+mincPlotSliceSeries(anatVolume, -log10(mincArray(qvs, "tvalue-Dose"))*sign(mincArray(vs, "tvalue-Dose")), anatLow=9, anatHigh=15, low=1.3, high=3, symmetric=T, begin=50, end=-40, legend="log10 q value", plottitle = "Dose (7 vs 0 only)")
+```
+
+# Linear model across volumes
+
+Now compute the volumes. There are several ways of doing so; in this case, we'll integrate the Jacobian determinants, since that is what we have for this particular pipeline. Takes a few minutes to run.
+
+```{r}
+library(RMINC)
+allvols <- anatGetAll(d7vsd0$Jacobfile_scaled, atlas=labelFile,
+                      defs=defsFile,method="jacobians")
+```
+
+And we have to put anatomy and hierarchical definitions together. This takes a few minutes to run
+
+```{r}
+AllenDefs <- "/hpf/largeprojects/MICe/tools/atlases/Allen_Brain/Allen_hierarchy_definitions.json"
+hdefs <- makeMICeDefsHierachical(defsFile, AllenDefs)
+```
+
+Next, add the volumes from this dataset into the hierarchy.
+
+```{r}
+hanatd7vsd0 <- addVolumesToHierarchy(hdefs, allvols)
+```
+
+Run a simple linear model
+
+```{r}
+hVs <- hanatLm(~Dose, d7vsd0, hanatd7vsd0)
+hanatView(hVs, "tvalue.Dose", low=2, high=6, symmetric=T)
+
+```
+
+Print them to the screen
+
+
+```{r}
+print(hVs, "tvalue.Dose", limit=NULL)
+```
+
+And display the results as images.
+
+```{r}
+
+labelVolume <- mincArray(mincGetVolume(labelFile))
+
+vol <- hanatToVolume(hVs, labelVolume, "tvalue.Dose")
+mincPlotSliceSeries(anatVolume, vol, low=2, high=6, symmetric=T, anatLow=9, anatHigh=15)
+```
+
+
+
+Now, let's correct for multiple comparisons here too:
+
+```{r}
+hVs <- hanatFDR(hVs)
+thresholds(hVs)
+```
+
+```{r}
+hanatView(hVs, "tvalue.Dose", low=4.12, high=8, symmetric=T, fontsize = 40, levelSeparation = 1000)
+```
+
+```{r}
+vol <- hanatToVolume(hVs, labelVolume, "tvalue.Dose")
+mincPlotSliceSeries(anatVolume, vol, low=4.12, high=8, symmetric=T, anatLow=9, anatHigh=15)
+```
+
+
+
+Let's do the anatomical analysis only on merged left and right variants of each structure.
+
+```{r}
+library(data.tree)
+hVsSymmetric <- Clone(hVs)
+Prune(hVsSymmetric, function(x) !(startsWith(x$name, "right") | startsWith(x$name, "left")))
+print(hVsSymmetric, "tvalue.Dose", limit=NULL)
+                   
+```
+
+```{r}
+vol <- hanatToVolume(hVsSymmetric, labelVolume, "tvalue.Dose")
+mincPlotSliceSeries(anatVolume, vol, low=4.12, high=8, symmetric=T, anatLow=9, anatHigh=15, 
+                    begin=50, end=-50)
+```
+
+We can also look at just a subset of the tree:
+
+```{r}
+print(FindNode(hVsSymmetric, "Hippocampal region"), "tvalue.Dose", limit=NULL)
+```
+
+```{r}
+vol <- hanatToVolume(FindNode(hVsSymmetric, "Hippocampal region"), labelVolume, "tvalue.Dose")
+mincPlotSliceSeries(anatVolume, vol, low=4.12, high=8, symmetric=T, anatLow=9, anatHigh=15, 
+                    begin=120, end=-170, plottitle = "Dose, Hippocampal region", legend="t-statistic",
+                    mfrow = c(3,3))
+```
+
+
+```{r}
+library(ggplot2)
+d7vsd0$volume <- FindNode(hanatd7vsd0, "Dentate gyrus")$volumes
+qplot(as.factor(Dose), volume, data=d7vsd0, geom="boxplot")
+```
+
+```{r}
+library(RMINC)
+allvols <- anatGetAll(gf$Jacobfile_scaled, atlas=labelFile,
+                      defs=defsFile,method="jacobians")
+hanat <- addVolumesToHierarchy(hdefs, allvols)
+```
+
