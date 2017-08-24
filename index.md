@@ -13,6 +13,8 @@ summer school sessions.
 - [Intro to R](/summer_school2017/intro_to_R/intro_to_r_slides20170816) - Chris Hammill
 - [Intro to Statistics](/summer_school2017/intro_to_stats/basic-stats.html) - Jason Lerch
 - [Basic Anatomical Analysis](/summer_school2017/basic_structural_analysis/intro-notebook.html) - Jason Lerch
+  * [DSURQE Atlas info](https://wiki.mouseimaging.ca/display/MICePub/Mouse+Brain+Atlases)
+  * [DSURQE Atlas Download](http://repo.mouseimaging.ca/repo/DSURQE_40micron/)
 
 ## Wednesday
 
