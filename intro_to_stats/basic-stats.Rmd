@@ -1,0 +1,175 @@
+---
+title: "Basic Stats"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+# Load the data
+
+```{r}
+library(ggplot2)
+load("/hpf/largeprojects/MICe/jason/MISS2017/intro-stats/irData.RData")
+```
+
+```{r}
+head(irData)
+```
+
+This is from the initial radiation study described by Elizabeth this morning, with more information to be found here:
+
+Gazdzinski LM, Cormier K, Lu FG, Lerch JP, Wong CS, Nieman BJ. Radiation-induced alterations in mouse brain development characterized by magnetic resonance imaging. Int J Radiat Oncol Biol Phys. 2012 Dec 1;84(5):e631–8.
+
+Based on that data, we will look at the dentate gyrus of the hippocampus to illustrate some issues in statistical modelling.
+
+# Plotting
+
+First, a few ways of showing the data:
+
+```{r}
+qplot(Dose, dentategyrus, data=irData, geom="point") + 
+  geom_smooth(method="lm") +
+  scale_x_continuous(breaks=unique(irData$Dose)) + 
+  ylab(expression(Volume ~ (mm^3))) +
+  ggtitle("Volume of Dentate Gyrus", subtitle = "Plotted against Irradiation Dose") + 
+  theme_classic() 
+```
+
+```{r}
+ggplot(irData, aes(y=dentategyrus, x=as.factor(Dose))) + 
+  geom_boxplot() + 
+  xlab("Radiation Dose") + 
+  ggtitle("Volume of Dentate Gyrus") + 
+  ylab(expression(Volume ~ (mm^3))) +
+  theme_classic()
+```
+
+
+```{r}
+library(ggjoy)
+ggplot(irData, aes(x=dentategyrus, y=as.factor(Dose))) + 
+  ylab("Radiation Dose") +
+  xlab(expression(Volume ~ (mm^3))) +
+  ggtitle("Volume of Dentate Gyrus") +
+  geom_joy()
+```
+
+# Modelling
+
+Let's start simple, and reduce it to just a dose of 0 (i.e. sham irradiation) and a dose of 7.
+
+```{r}
+irSimple <- subset(irData, Dose %in% c(0,7))
+```
+
+And look at what the data shows
+
+```{r}
+table(irSimple$Dose, irSimple$Sex)
+```
+
+
+A simple linear model
+
+```{r}
+summary(lm(dentategyrus ~ Dose, irSimple))
+```
+
+This is in units of dose, i.e. for every Gy you decrease volume by -0.14.
+
+So, highly significant. Let's explore
+
+
+Significance by simulation:
+
+```{r}
+m <- mean(irSimple$dentategyrus[irSimple$Dose==0])
+s <- sd(irSimple$dentategyrus[irSimple$Dose==0])
+
+nSims <- 1000
+simDraws <- vector(length = nSims)
+nSamples <- 10
+doseEffect <- -0.13822
+
+
+for (i in 1:nSims) {
+  simDraws[i] <- mean( rnorm(nSamples, mean=m, sd=s))
+}
+hist(simDraws)
+abline(v=m+doseEffect, col="red")
+mean(simDraws < (m+doseEffect))
+mean(simDraws < (m+(doseEffect*7)))
+```
+
+By permutations
+
+```{r}
+library(broom)
+nSims <- 1000
+nSamples <- nrow(irSimple)
+doseEffects <- vector(length=nSims)
+
+for (i in 1:nSims) {
+  irSimple$doseDraw <- sample(irSimple$Dose, size = nSamples, replace = FALSE)
+  l <- lm(dentategyrus ~ doseDraw, irSimple)
+  doseEffects[i] <- tidy(l)[2, "statistic"]
+}
+hist(doseEffects)
+mean(doseEffects < -7.917)
+
+```
+
+Let's look at a more subtle effect: sex in mice with sham irradiation:
+
+```{r}
+irSex <- subset(irData, Dose == 0)
+table(irSex$Sex)
+```
+
+```{r}
+summary(lm(dentategyrus ~ Sex, irSex))
+```
+
+And let's redo the permutation test
+
+```{r}
+library(broom)
+nSims <- 1000
+nSamples <- nrow(irSex)
+sexEffects <- vector(length=nSims)
+
+for (i in 1:nSims) {
+  irSex$sexDraw <- sample(irSex$Sex, size = nSamples, replace = FALSE)
+  l <- lm(dentategyrus ~ sexDraw, irSex)
+  sexEffects[i] <- tidy(l)[2, "statistic"]
+}
+hist(sexEffects)
+abline(v=0.03365, col="red")
+mean(sexEffects > 0.03365)
+mean(sexEffects > 0.03365) * 2
+```
+
+# More complex models
+
+Back to the whole data
+
+```{r}
+summary(lm(dentategyrus ~ Dose, irData))
+```
+
+Let's add sex
+
+```{r}
+qplot(Dose, dentategyrus, data=irData, geom="point", colour=Sex) + 
+  geom_smooth(method="lm") +
+  scale_x_continuous(breaks=unique(irData$Dose)) + 
+  ylab(expression(Volume ~ (mm^3))) +
+  ggtitle("Volume of Dentate Gyrus", subtitle = "Plotted against Irradiation Dose") + 
+  theme_classic()
+```
+
+
+```{r}
+summary(lm(dentategyrus ~ Dose * Sex, irData))
+```
+
