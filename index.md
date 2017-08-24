@@ -28,3 +28,4 @@ summer school sessions.
 - [Longitudinal Analysis](/summer_school2017/longitudinal_slides/MISS_Longitudinal_Analysis.pdf) - Lily Qiu and Darren Fernandes
 - [Longitudinal Registration](/summer_school2017/longitudinal_slides/MISS_Longitudinal_Registration.pdf) - Lily Qiu and Darren Fernandes
 - [Longitudinal Analysis Demo](https://github.com/Mouse-Imaging-Centre/summer_school2017/tree/master/longitudinal_analysis) - Darren Fernandes and Lily Qiu
+- [Longitudinal Anatomy Trees](/summer_school2017/longitudinal_anatomy_trees/longitudinal_anatomy_trees.html) - Jason Lerch
