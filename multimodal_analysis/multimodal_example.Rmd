@@ -1,0 +1,330 @@
+---
+title: "Multimodal analysis"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+# Data preparation
+
+## Load libraries
+
+Load the libraries required.
+```{r}
+library(RMINC)
+library(data.tree)
+library(ggplot2)
+```
+
+## Load required data
+
+First we point to the location of the data and atlases.
+```{r}
+datafile<-"/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/datatable_multimodal.csv"
+atlasLabels<-"/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/DSU_v2_mapping_of_labels_withABI.csv"
+resampAtlas<-"/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/atlas/DSU_v2_on_NRXN1a_labels_resampled.mnc"
+resampMask <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/atlas/Dorr_2008_Steadman_2013_Ullmann_2013_on_NRXN1a_v1_mask_resampled.mnc"
+cortexMask <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/mask_cortex.mnc"
+```
+
+Next, read in the data.
+```{r}
+defs <- read.csv(atlasLabels)
+df <- as.data.frame(read.csv(datafile, header = TRUE, sep = ",", stringsAsFactors=FALSE), stringsAsFactors=FALSE)
+```
+
+## Get irradiation dataset brain region volumes
+Now, we want to extract brain region volumes from a set of image determinant (MINC) files. The regions are defined in the atlas; the location of this atlas is in `resampAtlas`. The `anatGetAll()` function from our `RMINC` package will compute the volumes under these labels
+```{r}
+vols <- anatGetAll(filename = df$log_det_scaled0.1, atlas = resampAtlas, defs=atlasLabels, method="jacobians") #Find volumes of structures from resampled atlas
+volsCombined <- anatCombineStructures(vols, defs=atlasLabels, method="jacobians") #Get volumes of the combined (left and right) structures
+```
+
+## Get MTR metric 
+Next, do the same thing to get the mean MTR value under each label. Note that this is not volumetric data, and so the `method` argument must be accordingly specified. 
+```{r}
+mtr <- anatGetAll(filename = df$mtr_orig, atlas = resampAtlas, defs=atlasLabels, method="means")
+mtrCombined <- anatCombineStructures(mtr, defs=atlasLabels, method="means")
+
+mtrCortex <- anatGetAll(filename = df$mtr_orig, atlas = cortexMask, defs=atlasLabels, method="means")
+df$mtrCortex <- mtrCortex[,1]
+```
+
+## Get DTI metrics
+
+Repeat for the mean diffusivity (MD)...
+### Mean diffusivity
+```{r}
+md <- anatGetAll(filename = df$MD_orig, atlas = resampAtlas,defs=atlasLabels,method="means")
+mdCombined<-anatCombineStructures(md,defs=atlasLabels,method="means")
+```
+
+...and the fractional anistropy (FA).
+### Fractional anisotropy
+```{r}
+fa <- anatGetAll(filename = df$FA_orig, atlas = resampAtlas,defs=atlasLabels,method="means")
+faCombined<-anatCombineStructures(fa,defs=atlasLabels,method="means")
+```
+
+# Analysis
+
+## MTR
+
+Here, we will set up a linear model to model the effects of dose on MTR, for each voxel in the brain. The extra term `mtrCortex` is to normalize to the mean value of the MTR in the cortex.
+```{r}
+mtr_lm <- mincLm(mtr_blur_0.2 ~ Dose + mtrCortex, df, mask=resampMask)
+```
+
+Let's look at what the distribution of voxel values in the average MTR image looks like...
+```{r}
+anatFile <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/transformed_mnc_files/mt/mtr_average.mnc"
+anatVolume <- mincArray(mincGetVolume(anatFile))
+hist(anatVolume)
+```
+
+...and plot this as brain slices.
+```{r}
+mincPlotSliceSeries(anatVolume, mincArray(mtr_lm, "tvalue-Dose"), anatLow=0, anatHigh=0.2, low=2, high=15, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+```
+
+Next, compute thresholds using the false discovery rate method described by Benjamini and Hochberg (1995).
+```{r}
+qvs <- mincFDR(mtr_lm, mask=resampMask)
+```
+
+Let's see the thresholds:
+```{r}
+qvs
+```
+
+And let's replot this with the colours set to reflect our FDR method determined thresholds.
+```{r}
+mincPlotSliceSeries(anatVolume, mincArray(mtr_lm, "tvalue-Dose"), anatLow=0, anatHigh=0.2, low=3.6, high=15, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+```
+
+## FA
+
+Repeat all the above for FA.
+```{r}
+fa_lm  <- mincLm(FA_blur_0.2 ~ Dose, df, mask=resampMask)
+```
+
+```{r}
+anatFile <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/transformed_mnc_files/dti/FA_average.mnc"
+anatVolume <- mincArray(mincGetVolume(anatFile))
+hist(anatVolume)
+```
+
+```{r}
+mincPlotSliceSeries(anatVolume, mincArray(fa_lm , "tvalue-Dose"), anatLow=0, anatHigh=0.8, low=2, high=15, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+```
+
+```{r}
+qvs <- mincFDR(fa_lm, mask=resampMask)
+```
+
+```{r}
+qvs
+```
+
+```{r}
+mincPlotSliceSeries(anatVolume, mincArray(fa_lm, "tvalue-Dose"), anatLow=0, anatHigh=0.8, low=9.18, high=15, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+```
+
+## Compare FA and MTR
+
+Do FA and MTR show similar changes after irradiation? Let's plot the t-statistic value for FA changes against the t-stat value for MTR changes. To do so, first we will determine which voxels are within the brain using the mask, and then choose only those voxels.
+```{r}
+maskdata <- mincGetVolume(resampMask)
+fa_voxels <- fa_lm[,"tvalue-Dose"][maskdata > 0.5]
+mtr_voxels <- mtr_lm[,"tvalue-Dose"][maskdata > 0.5]
+
+```
+
+Now for the plotting, with the `ggplot2` library.
+```{r}
+mtr_fa_voxels <- data.frame(mtr=mtr_voxels, fa=fa_voxels)
+plt <- ggplot(data = mtr_fa_voxels, aes(x=mtr, y=fa))
+plt <- plt + geom_point(size=0.1, alpha=0.005)
+print(plt)
+```
+
+Let's visualize the spatial MTR and FA changes by gridding the above plot, and labeling each voxel with a value based on which part of the grid the datapoint lies within.
+```{r}
+mtrp5 <- mtr_fa_voxels$mtr >= 5
+mtr0 <- (mtr_fa_voxels$mtr < 5 & mtr_fa_voxels$mtr >= -5)
+mtrn5 <- mtr_fa_voxels$mtr < -5
+
+fap3 <- mtr_fa_voxels$fa >= 3
+fa0 <- (mtr_fa_voxels$fa < 3 & mtr_fa_voxels$fa >= -3)
+fan3 <- mtr_fa_voxels$fa < -3
+
+mtr_fa_labeled_data <- maskdata
+
+mtr_fa_labeled_data[maskdata > 0.5][which(mtrp5 & fap3)] <- 1
+mtr_fa_labeled_data[maskdata > 0.5][which(mtrp5 & fa0)] <- 2
+mtr_fa_labeled_data[maskdata > 0.5][which(mtrp5 & fan3)] <- 3
+
+mtr_fa_labeled_data[maskdata > 0.5][which(mtr0 & fap3)] <- 4
+mtr_fa_labeled_data[maskdata > 0.5][which(mtr0 & fa0)] <- 0
+mtr_fa_labeled_data[maskdata > 0.5][which(mtr0 & fan3)] <- 6
+
+mtr_fa_labeled_data[maskdata > 0.5][which(mtrn5 & fap3)] <- 7
+mtr_fa_labeled_data[maskdata > 0.5][which(mtrn5 & fa0)] <- 8
+mtr_fa_labeled_data[maskdata > 0.5][which(mtrn5 & fan3)] <- 9
+
+mincPlotSliceSeries(anatomy = anatVolume, mincArray(mtr_fa_labeled_data), anatLow=0, anatHigh=0.8, low=0, high=9, symmetric=F, begin=50, end=-40, legend="Clusters", plottitle = "MTR and FA ...", col = rainbow(10))
+
+# Write the data
+mincWriteVolume(mtr_fa_labeled_data, output.filename = "mtr_fa_clusters.mnc")
+```
+
+## Gene enrichment analysis with external dataset
+
+Now, let's see which genes share a similar expression profile to the MTR values. First, load in the data which already has been collected for you.
+```{r}
+load("/hpf/largeprojects/MICe/yyee/summerschool/multimodal_analysis/demo/vols_gene_and_connectivity.RData")
+```
+Darren Fernandes has provided code to work with raw Allen Institute data: https://github.com/DJFernandes/ABIgeneRMINC .
+
+The expression dataset needs a bit of preprocessing. For example, the raw values reported in the expression datasets come from different experiments, and so are not comparable. To get around this, we need to normalize the data. We'll do a crude normalization by dividing by the total expression (row sum).
+```{r}
+gs <- dat$expression_sagittal
+gs <- gs/rowSums(gs, na.rm = TRUE)
+```
+
+Next, only choose the structures in which the data was collected (left hemisphere)
+```{r}
+strucs_right <- colnames(gs)[which(startsWith(colnames(gs), "right"))]
+strucs_left <- colnames(gs)[which(startsWith(colnames(gs), "left"))]
+strucs <- strucs_left
+vl <- gs[,which(colnames(gs) %in% strucs)]
+```
+
+Let's visualize the distribution of relative expression levels under each structure. In particular, notice the outliers on the left end of the distribution.
+```{r}
+hist(colSums(vl, na.rm=TRUE), 20)
+```
+
+Digging a bit deeper, we can find out which structures these are.
+```{r}
+names(which(colSums(vl, na.rm = TRUE) < 30))
+```
+
+You might notice these are structures located at the most lateral part of the brain. This makes sense; the data was acquired by slicing sagitally, which might cause issues for these structures. Let's remove them, along with CSF structures.
+```{r}
+strucs <- setdiff(strucs, names(which(colSums(vl, na.rm = TRUE) < 30)))
+strucs <- setdiff(strucs, paste("left", as.character(defs$Structure[which(defs$tissue.type =="CSF")])))
+vl <- vl[,strucs]
+```
+
+The Allen Institute also provides a list of non-expressing genes (supplementary table in their 2007 paper by Lein et. al.), so let's also remove these. To do so, we will first read in this list. Then we'll rename the rows of the expression dataframe to strip out the expression ID and just keep the gene name part. Lastly, we'll subset the data to only have the rows with gene names not in the non-expressing gene list.
+```{r}
+nonexpressing_list_of_genes <- "/hpf/largeprojects/MICe/yyee/projects/greedy_gene_enrichment/nonexpressing_genes.txt"
+
+gene_ids_raw <- rownames(vl)
+gene_ids <- gsub("\\*", "", gene_ids_raw)
+gene_names <- sapply(strsplit(gene_ids, "_sid"), "[[", 1)
+nonexpressors <- as.character(read.table(nonexpressing_list_of_genes)$V1)
+expressors <- setdiff(gene_names, nonexpressors)
+vl <- vl[which(gene_names %in% expressors),]
+rownames(vl) <- gsub("\\*", "", rownames(vl))
+```
+
+Finally, remove any genes that are not in the list provided but still have no expression.
+```{r}
+vl[is.na(vl)] <- 0
+vl <- vl[which(rowSums(vl) > 0.2),]
+colnames(vl) <- gsub("left ", "", colnames(vl))
+```
+
+Now we have a `g x p` table which represents the relative spatial expression pattern for `g` genes and `p` regions. We also have a structural imaging dataset (MTR) that is an `n x p` table, where n is the number of mice and p is the number of regions. Let's just pick the mean MTR values for a single mouse, to give us a length `p` vector. We can ask the question, which genes show a similar expression profile as this MTR vector? To determine this, we will compute univariate correlations between the MTR vector and the spatial expression profile of each gene. Note that there are other methods that might be more appropriate for picking genes that associate with a structural profile such as sparse regression (LASSO, elastic nets), but let's stick with the good old Pearson correlation for now. 
+
+```{r}
+mtr_1mouse <- mtrCombined[1,colnames(vl)]
+
+cordf <- data.frame(gene_id=rownames(vl), gene_mtr_cor=numeric(dim(vl)[1]))
+for (i in 1:dim(cordf)[1]) {
+  r <- cor(mtr_1mouse, as.numeric(vl[i,]))
+  cordf$gene_mtr_cor[i] <- r
+  #cat(".")
+}
+cat("Done.\n")
+
+```
+
+Write out the ranked gene list to a file. If you are confused with the long expression given to the `write.table` function, run the nested parts of it, bit by bit, to see what's happening. 
+```{r}
+write.table(sapply(strsplit(as.character(cordf[order(cordf$gene_mtr_cor, decreasing = TRUE),"gene_id"]), "_sid"), "[[", 1), "/tmp/MTR_1mouse_genes.txt", row.names = FALSE, col.names = F, quote=F)
+```
+
+You can input this gene list into GO enrichment software. Here is the result for these genes: http://cbl-gorilla.cs.technion.ac.il/GOrilla/33gwj7b4/GOResults.html
+
+## Connectivity analysis
+
+Let's get an idea of what the connectivity data looks like.
+```{r}
+tracer_image <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/data/projection/180436360/projection_density.mnc"
+tracer_vol <- mincArray(mincGetVolume(tracer_image))
+anatFile <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/transformed_mnc_files/mt/mtr_average.mnc"
+anatVolume <- mincArray(mincGetVolume(anatFile))
+mincPlotSliceSeries(anatVolume, tracer_vol, anatLow=0, anatHigh=0.2, low=0.1, high=0.5, symmetric=F, begin=50, end=-40, legend="tracer density", plottitle = "", col=colorRampPalette(c("black", "green"))(100))
+
+```
+
+Get injection experiment data.
+```{r}
+injection_experiments <- read.csv("/hpf/largeprojects/MICe/yyee/analysis/structural_covariance/voxelwise/injection_experiments.csv")[,c(1:19,22:23)]
+```
+
+Let us try and see if the irradiation-induced changes in MD are between regions connected by fiber tracts. First, we'll run a linear model for MD and plot the MD changes. For simplicity, let's only consider irradiation includes decreases in MD. 
+```{r}
+md_lm <- mincLm(MD_blur_0.2 ~ Dose, df, mask=resampMask)
+anatFile <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/transformed_mnc_files/mt/mtr_average.mnc"
+anatVolume <- mincArray(mincGetVolume(anatFile))
+mincPlotSliceSeries(anatVolume, mincArray(md_lm, "tvalue-Dose"), anatLow=0, anatHigh=0.2, low=2, high=15, symmetric=T, begin=50, end=-40, legend="t-statistic", plottitle = "Dose (7 vs 0 only)")
+
+```
+
+We've binarized and labeled the regions of negative changes in MD for you. Load that in and visualize it.
+```{r}
+neg_labels <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/md_strucatlas.mnc"
+neg_labels_array <- mincArray(mincGetVolume(neg_labels))
+max_label_value <- max(neg_labels_array)
+mincPlotSliceSeries(anatVolume, neg_labels_array, anatLow=0, anatHigh=0.2, low=1, high=max_label_value, symmetric=F, begin=50, end=-40, legend="Label", plottitle = "Dose (7 vs 0 only)", col=rainbow(151))
+```
+
+Let's get the mean tracer projection value under each of these labels.
+```{r}
+projection_directory <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/data/projection"
+tracer_ids <- list.files(projection_directory)
+tracer_files <- paste(projection_directory, tracer_ids, "projection_density.mnc", sep="/")
+
+defs_md_neg_blobs <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/neg_blob_defs.csv"
+#tracer_vols <- anatGetAll(tracer_files, atlas=neg_labels, defs=defs_md_neg_blobs, method="means")
+#save("tracer_vols", file = "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/tracer_volumes_under_md_blobs.RData")
+load("/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/tracer_volumes_under_md_blobs.RData")
+```
+
+Now, let's count, for each tracer (row), the number of structures that have a tracer mean value of greater than 0.1.
+```{r}
+num_elements_greater_than_0.1 <- function(x) {
+  return(length(which(x > 0.1)))
+}
+
+num_strucs <- apply(tracer_vols, 1, FUN = "num_elements_greater_than_0.1")
+tracer_overlaps <- data.frame(tracer_id=tracer_ids, num_overlapping_strucs=num_strucs)
+tracer_overlaps[which.max(tracer_overlaps$num_overlapping_strucs),]
+injection_experiments[injection_experiments$id==tracer_overlaps$tracer_id[which.max(tracer_overlaps$num_overlapping_strucs)],]
+
+```
+
+```{r}
+tracer_image <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/stats/data/projection/158257355/projection_density.mnc"
+tracer_vol <- mincArray(mincGetVolume(tracer_image))
+anatFile <- "/hpf/largeprojects/MICe/edeguzman/misscanada/multi_modal_data/transformed_mnc_files/mt/mtr_average.mnc"
+anatVolume <- mincArray(mincGetVolume(anatFile))
+mincPlotSliceSeries(anatVolume, tracer_vol, anatLow=0, anatHigh=0.2, low=0.1, high=0.5, symmetric=F, begin=50, end=-40, legend="tracer density", plottitle = "", col=colorRampPalette(c("black", "green"))(100))
+```
+
+
