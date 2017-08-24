@@ -7,6 +7,7 @@ summer school sessions.
 
 - [Why Mouse Structural MRI](/summer_school2017/why_structural_MRI/why_structural_MRI_slides.html) - Dulcie Vousden
 - [Mouse MRI Primer](/summer_school2017/Mouse_MRI_primer/) - Leigh Spencer Noakes, Aidin Arbabi, and Jacob Ellegood
+- [Mouse MRS Primer](/summer_school2017/Mouse_MRS/) - Leigh Spencer Noakes, Gena Markous, and Brian Nieman
 - [Intro to bash](/summer_school2017/intro_to_bash/intro_to_bash_slides20170821) - Dulcie Vousden
 
 ## Tuesday
