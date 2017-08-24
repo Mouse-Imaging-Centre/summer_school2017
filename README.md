@@ -21,6 +21,8 @@ summer school sessions.
 
 ## Thursday
 
+- In Vivo MRI - Kamila Szulc
+  * [4D atlas paper](/summer_school2017/in_vivo_MRI/4D_atlas_paper_methods.pdf)
 - [Longitudinal Analysis](/summer_school2017/longitudinal_slides/MISS_Longitudinal_Analysis.pdf) - Lily Qiu and Darren Fernandes
 - [Longitudinal Registration](/summer_school2017/longitudinal_slides/MISS_Longitudinal_Registration.pdf) - Lily Qiu and Darren Fernandes
 - [Longitudinal Analysis Demo](https://github.com/Mouse-Imaging-Centre/summer_school2017/tree/master/longitudinal_analysis) - Darren Fernandes and Lily Qiu
