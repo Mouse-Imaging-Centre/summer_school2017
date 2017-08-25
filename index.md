@@ -22,6 +22,7 @@ summer school sessions.
 
 - [Install Notes](/summer_school2017/install_notes/install_notes) - Chris Hammill
 - [Intro to Registration](/summer_school2017/intro_to_registration/MISSregistration.pdf) - Darren Fernandes
+- [Multimodal Imaging](/summer_school2017/multimodal_imaging/multimodalandquant.pdf) - Elizabeth De Guzeman
 - [Multimodal Analysis](/summer_school2017/multimodal_analysis/multimodal_example.html) - Elizabeth De Guzeman and Yohan Yee 
 
 ## Thursday
